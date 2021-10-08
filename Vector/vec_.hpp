@@ -1,10 +1,36 @@
 template<typename T>
 Vector<T>::Vector() : m_size{}, m_cap{}, m_arr{ nullptr }
-{}
+{
+}
 
 template<typename T>
 Vector<T>::~Vector() {
-	delete[] m_arr;
+	if (m_arr!= nullptr) { delete[] m_arr; }
+}
+
+template<typename T>
+Vector<T>::Vector(int counter, const T& elem) : m_size{}, m_cap{} {
+	if (counter > 0) {
+		m_size = counter;
+		m_cap = counter;
+		m_arr = new T[m_cap];
+		for (int i = 0; i < m_size; ++i) {
+			m_arr[i] = elem;
+		}
+	}
+	else {
+		std::cout << "Counter must be positive number.\n";
+		exit(-1);
+	}
+}
+template<typename T>
+Vector<T>::Vector(Vector&& rhs) noexcept{
+	this->m_size = rhs.m_size;
+	this->m_cap = rhs.m_cap;
+	this->m_arr = rhs.m_arr;
+	rhs.m_arr = nullptr;
+	rhs.m_size = 0;
+	rhs.m_cap = 0;
 }
 
 template<typename T>
@@ -26,17 +52,39 @@ Vector<T>::Vector(std::initializer_list<T> a) : m_size{ (int)a.size() }, m_cap{ 
 }
 
 template<typename T>
-Vector<T>& Vector<T>::operator=(const Vector<T>& other) {
+Vector<T>& Vector<T>::operator=(const Vector& other) {
 	if (this == &other) {
 		return *this;
 	}
-	delete[] m_arr;
-	m_cap = other.m_cap;
-	m_size = other.m_size;
-	m_arr = new T[m_cap];
-	for (int i = 0; i < m_size; ++i) {
-		m_arr[i] = other.m_arr[i];
+	if (m_cap >= other.m_size) {
+		m_size = other.m_size;
+		for (int i = 0; i < m_size; ++i) {
+			m_arr[i] = other.m_arr[i];
+		}
 	}
+	else {
+		delete[] m_arr;
+		m_cap = other.m_cap;
+		m_size = other.m_size;
+		m_arr = new T[m_cap];
+		for (int i = 0; i < m_size; ++i) {
+			m_arr[i] = other.m_arr[i];
+		}
+	}
+	return *this;
+}
+
+template<typename T>
+Vector<T>& Vector<T>::operator=(Vector&& other) {
+	if (this == &other) {
+		return *this;
+	}
+	this->m_size = other.m_size;
+	this->m_cap = other.m_cap;
+	this->m_arr = other.m_arr;
+	other.m_arr = nullptr;
+	other.m_size = 0;
+	other.m_cap = 0;
 	return *this;
 }
 
@@ -55,13 +103,26 @@ Vector<T> Vector<T>::operator+(const Vector& oth) {
 	}
 	return r;
 }
-template<typename T>
-T& Vector<T>::operator[](int iter) {
-	if (iter < m_size) {
+
+template <typename T>
+T& Vector<T>::at(const int iter) const {
+	if (iter >= 0 && iter < m_size) {
 		return m_arr[iter];
 	}
 	else {
 		std::cout << "Segmentation fault - run time error\n";
+		exit(-1);
+	}
+}
+
+template<typename T>
+T& Vector<T>::operator[](const int iter) const {
+	if (iter >= 0 && iter < m_size) {
+		return m_arr[iter];
+	}
+	else {
+		std::cout << "Segmentation fault - run time error\n";
+		exit(-1);
 	}
 }
 
@@ -100,23 +161,51 @@ void Vector<T>::push_front(const T& element) {
 	m_arr[0] = element;
 	++m_size;
 }
+
 template<typename T>
-void Vector<T>::erase(int size_pos){
+inline void Vector<T>::erase(int size_pos) {
 	if (size_pos >= 0 && size_pos < m_size)
 	{
-		for (int i = size_pos; i < m_size-1; ++i)
-		{
+		for (int i = size_pos; i < m_size - 1; ++i){
 			m_arr[i] = m_arr[i + 1];
 		}
 		--m_size;
 	}
 }
+
+template <typename T>
+void Vector<T>::resize(int s, const T& elem) {
+	if (s < m_size) {
+		m_size = s;
+	}
+	else {
+		if (s <= m_cap) {
+			for (int i = m_size; i < s; ++i) {
+				m_arr[i] = elem;
+			}
+			m_size = s;
+		}
+		else {
+			T* tmp = new T[s];
+			for (int i = 0; i < m_size; ++i) {
+				tmp[i] = m_arr[i];
+			}
+			for (int i = m_size; i < s; ++i) {
+				tmp[i] = elem;
+			}
+			delete[] m_arr;
+			m_arr = tmp;
+			m_size = m_cap = s;
+		}
+	}
+}
+
 template <typename T>
 int Vector<T>::getCapacity() const {
 	return m_cap;
 }
+
 template <typename T>
 int Vector<T>::getSize() const {
 	return m_size;
 }
-// template <typename T>
