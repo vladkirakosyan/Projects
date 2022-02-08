@@ -15,10 +15,6 @@ namespace selfOrganizingList
 		/* PARAMETRIZED CONSTRUCTORS */
 		Flist(size_t count,const T& val);
 
-		/* COPY & MOVE CONSTRUCTORS*/
-		Flist(const Flist&);
-		Flist(Flist&&) noexcept;
-
 		/* COPY ASSIGNMENT OPERATORS */
 		Flist& operator=(const Flist&);
 		Flist& operator=(Flist&&) noexcept;
@@ -32,7 +28,6 @@ namespace selfOrganizingList
 		void pop_back();
 		void push_front(const T& data);
 		void pop_front();
-		size_t find(T data);
 		void insert(size_t pos, const T& val);
 		bool isEmpty() const;
 		void clear() noexcept;

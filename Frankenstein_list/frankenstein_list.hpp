@@ -23,7 +23,7 @@ selfOrganizingList::Flist<T>::Flist(size_t count,const T& val)
 		Node<T>* cur = _head;
 		Node<T>* prev = cur;
 
-		while (count--)
+		while (--count)
 		{
 			cur->_next = new Node<T>(val);
 			cur = cur->_next;
@@ -57,7 +57,7 @@ selfOrganizingList::Flist<T>::Flist(Flist<T>&& src) noexcept
 	src._head = src._tail = src.m_asc = src.m_desc = nullptr;
 }
 
-/* FUNCTIONS SUPPORTED BY FORWARD_LIST */
+/* FUNCTIONS SUPPORTED BY F_LIST */
 template <typename T>
 size_t selfOrganizingList::Flist<T>::size() const noexcept
 {
@@ -80,12 +80,16 @@ void selfOrganizingList::Flist<T>::clear() noexcept
 template <typename T>
 T selfOrganizingList::Flist<T>::maxElem() const
 {
+	if (!m_desc)
+		throw std::invalid_argument("m_desc is null/");
 	return m_desc->_data;
 }
 
 template <typename T>
 T selfOrganizingList::Flist<T>::minElem() const
 {
+	if (!m_asc)
+		throw std::invalid_argument("m_asc is null/");
 	return m_asc->_data;
 }
 
@@ -99,12 +103,16 @@ bool selfOrganizingList::Flist<T>::isEmpty() const
 template <typename T>
 T selfOrganizingList::Flist<T>::front() const
 {
+	if (isEmpty())
+		throw std::out_of_range("List is empty.");
 	return _head->_data;
 }
 
 template <typename T>
 T selfOrganizingList::Flist<T>::back() const
 {
+	if (!_tail)
+		throw std::out_of_range("List is empty.");
 	return _tail->_data;
 }
 
@@ -120,7 +128,6 @@ void selfOrganizingList::Flist<T>::push_front(const T& data)
 		_head->_prev = newNode;
 		newNode->_next = _head;
 		_head = newNode;
-		if (size() == 1) _tail = _head;
 		pushSortedWay(_head);
 	}
 }
@@ -137,7 +144,6 @@ void selfOrganizingList::Flist<T>::push_back(const T& data)
 		_tail->_next = lastNode;
 		lastNode->_prev = _tail;
 		_tail = _tail->_next;
-		if (size() == 1) _head = _tail;
 		pushSortedWay(_tail);
 	}
 }
@@ -176,6 +182,42 @@ void selfOrganizingList::Flist<T>::pop_back()
 		_tail = _tail->_prev;
 		_tail->_next = nullptr;
 		delete pr;
+	}
+}
+
+template<typename T>
+void selfOrganizingList::Flist<T>::printSortedWay(bool ascending) const
+{
+	Node<T>* cur = ascending ? m_asc : m_desc;
+	while (cur) {
+		std::cout << cur->_data << std::endl;
+		cur = ascending ? cur->_asc : cur->_desc;
+	}
+}
+
+template<typename T>
+void selfOrganizingList::Flist<T>::insert(size_t pos, const T& val)
+{
+	if (pos > size()) {
+		throw std::invalid_argument("Position is invalid\n");
+	}
+	if (pos == 0) {
+		push_front(val);
+	}
+	else if (pos == size()) {
+		push_back(val);
+	}
+	else {
+		Node<T>* tmp = _head;
+		while (--pos) {
+			tmp = tmp->_next;
+		}
+		Node<T>* n = new Node<T>(val);
+		tmp->_next->_prev = n;
+		n->_next = tmp->_next;
+		n->_prev = tmp;
+		tmp->_next = n;
+		pushSortedWay(n);
 	}
 }
 
