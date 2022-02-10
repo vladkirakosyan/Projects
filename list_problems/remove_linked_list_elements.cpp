@@ -3,12 +3,15 @@ public:
     ListNode* removeElements(ListNode* head, int val) {
         if(head == nullptr)
             return nullptr;
-        if(head->val == val) {
+        
+        while(head !=nullptr && head->val==val) {
             ListNode* h = head;
             head = head->next;
             h->next = nullptr;
+            h->next = nullptr;
             delete h;
         }
+        
         ListNode* f = head;
         while(f != nullptr && f->next != nullptr)
         {
@@ -22,8 +25,6 @@ public:
                 f = f->next;
             }
         }
-        
         return head;
-
     }
 };
